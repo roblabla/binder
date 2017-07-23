@@ -1,0 +1,13 @@
+[package]
+name = "binder"
+version = "0.1.0"
+authors = ["roblabla <unfiltered@roblab.la>"]
+
+[dependencies]
+encoding = "0.2"
+nix = { path = "../nix" }
+libc = "0.2"
+log = "0.3"
+error-chain = "0.10"
+byteorder = "1.0"
+bitflags = "0.9"
