@@ -1,0 +1,43 @@
+dist: trusty
+sudo: false
+language: android
+android:
+  components:
+  - tools
+  - platform-tools
+  - build-tools-19.1.0
+  - android-22
+  - sys-img-armeabi-v7a-android-24
+  - sys-img-arm64-v8a-android-24
+  - sys-img-x86-android-24
+  - sys-img-x86_64-android-24
+matrix:
+  include:
+  - os: linux
+    env: SIM=armeabi-v7a
+before_install:
+- curl https://sh.rustup.rs -sSf | sh
+install:
+- rustup target add $TARGET
+before_script:
+- echo no | avdmanager create avd --force --name test -k system-images;android-24;default;$SIM
+- emulator -avd-test -no-audio -no-window &
+- android-wait-for-emulator
+- adb shell input keyevent 82 &
+script:
+- cargo build
+- cargo doc
+- cargo test --no-run --message-format=json | jq -r "select(.profile.test == true)
+  | .filenames[]" | xargs -I "{}" sh -c "adb push {} /data/local/tmp && adb shell
+  {}"
+deploy:
+  provider: pages
+  skip_cleanup: true
+  github_token:
+    secure: b12h3LTKIZOB2JkWfD5DWH+wuMUHz9hXbOYbXZINXubD813o154DoC8/+UR7VhIVrKF8jSeR5OsrYNAeef8mMHPfeKPgFoK9iyH6mYYxh1rUgI/CwqmHnkKAaSQDkIjOHX16IuetlU98NqZaCay3Dc0SSxJoTKEAxWV17gYvZklNxnUg4bCjw9ZM6g3fXh+DzP4CrSHnEW3lJHtBKKhmdS0uU//dCcTaJYsIr2jKN8OXAm4J/VEXn2FX49+t+rZAokzh5elGZ5YFZjfyFYF61o1TB/gsQA3sm4m68Y2RUb6iXxpxaahRh60xIkgnAK4M7GwIwu2eSvhNdJ/fFB+zDnZ7mNTb+zn5W3yjIdtG1rjnFlOwLOCtWxCvwdCcgiMw2pzylNjR749H/vVoCH+wFveutr78uwsc3wMwu+OGHz7mbGAi5QYiOs3WQhQpzFWvi8uU3+8apPahv785+66vPCwMLsAFNn39ligcaF6x0i9Mo4Wfd55utnBLFf3OPNgQG8H3N1ye7U0rJx3lg8NUlu1hoD+9l4hp6E2x+lulsLeuwcZGSPVx+gxTyivp806iCrxxtbuJIsYRRMmxon9WzUlWtqOBR7kQSjhp9JhGIFQI1pDY6LSCIw0Hi/Vah9W++8OPB5mPJHDqwiKFageN0HsAfqJO7ftILTpPnE7hRQI=
+  local_dir: target/arm-linux-androideabi/doc
+  on:
+    branch: master
+
+env:
+  global:
