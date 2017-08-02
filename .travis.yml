@@ -20,6 +20,7 @@ matrix:
     - SIM=armeabi-v7a
 before_install:
 - curl https://sh.rustup.rs -sSf | sh -s -- -y
+- source ~/.cargo/env
 install:
 - rustup target add $TARGET
 before_script:
