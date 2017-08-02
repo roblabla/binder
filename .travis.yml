@@ -6,7 +6,7 @@ android:
   - tools
   - platform-tools
   - build-tools-19.1.0
-  - android-22
+  - android-24
   - sys-img-armeabi-v7a-android-24
   - sys-img-arm64-v8a-android-24
   - sys-img-x86-android-24
