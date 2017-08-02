@@ -13,10 +13,13 @@ android:
   - sys-img-x86_64-android-24
 matrix:
   include:
+  # arm-linux-androideabi
   - os: linux
-    env: SIM=armeabi-v7a
+    env:
+    - TARGET=arm-linux-androideabi
+    - SIM=armeabi-v7a
 before_install:
-- curl https://sh.rustup.rs -sSf | sh
+- curl https://sh.rustup.rs -sSf | sh -s -- -y
 install:
 - rustup target add $TARGET
 before_script:
