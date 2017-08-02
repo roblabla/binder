@@ -17,15 +17,15 @@ matrix:
   - os: linux
     env:
     - TARGET=arm-linux-androideabi
-    - SIM=armeabi-v7a
+    - SIM_ABI=armeabi-v7a
 before_install:
 - curl https://sh.rustup.rs -sSf | sh -s -- -y
 - source ~/.cargo/env
 install:
 - rustup target add $TARGET
 before_script:
-- echo no | avdmanager create avd --force --name test -k system-images;android-24;default;$SIM
-- emulator -avd-test -no-audio -no-window &
+- echo no | android create avd --force -n test -t android-24 --abi $SIM_ABI
+- emulator -avd test -no-audio -no-window &
 - android-wait-for-emulator
 - adb shell input keyevent 82 &
 script:
