@@ -15,8 +15,6 @@ matrix:
       - android-24
       - sys-img-armeabi-v7a-android-24
 before_install:
-- openssl aes-256-cbc -K $encrypted_52aad774d5b3_key -iv $encrypted_52aad774d5b3_iv
-  -in ci/id_rsa.enc -out ci/id_rsa -d
 - set -eo pipefail
 - git clone https://github.com/dekalo-stanislav/android-ndk $HOME/android-ndk
 - export ANDROID_NDK_HOME=$HOME/android-ndk
@@ -43,11 +41,15 @@ script:
 - cargo test --target=$TARGET --no-run #--message-format=json | jq -r "select(.profile.test == true)
   #| .filenames[]" | xargs -I "{}" sh -c "adb push {} /data/local/tmp && adb shell
   #/data/local/tmp/$(basename {})"
+after_success:
+- eval "$(ssh-agent -s)"
+- openssl aes-256-cbc -K $encrypted_52aad774d5b3_key -iv $encrypted_52aad774d5b3_iv
+  -in ci/id_rsa.enc -out ci/id_rsa -d
+- chmod 600 ci/id_rsa
 - ssh-add ci/id_rsa
 - cd target/$TARGET/doc
 - git init
-- git remote add "git@github.com:roblabla/binder"
+- git remote add origin "git@github.com:roblabla/binder"
 - git checkout -b gh-pages
-- git add .
-- git commit -m "Docs"
+- git commit -am "Docs"
 - git push --force origin gh-pages
