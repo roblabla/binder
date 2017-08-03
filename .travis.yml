@@ -33,6 +33,7 @@ before_script:
 - echo "[target.${TARGET}]" >> .cargo/config
 - echo linker = "${TARGET}-gcc" >> .cargo/config
 - echo ar = "${TARGET}-ar" >> .cargo/config
+- cat .cargo/config
 script:
 - cargo build --target=$TARGET
 - cargo doc --target=$TARGET
