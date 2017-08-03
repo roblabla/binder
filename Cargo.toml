@@ -5,9 +5,9 @@ authors = ["roblabla <unfiltered@roblab.la>"]
 
 [dependencies]
 encoding = "0.2"
-nix = { path = "../nix" }
+nix = { git = "https://github.com/nix-rust/nix" }
 libc = "0.2"
 log = "0.3"
 error-chain = "0.10"
-byteorder = "1.0"
+byteorder = "1.1"
 bitflags = "0.9"
