@@ -32,7 +32,7 @@ script:
 - cargo doc
 - cargo test --no-run --message-format=json | jq -r "select(.profile.test == true)
   | .filenames[]" | xargs -I "{}" sh -c "adb push {} /data/local/tmp && adb shell
-  {}"
+  /data/local/tmp/$(basename {})"
 deploy:
   provider: pages
   skip_cleanup: true
