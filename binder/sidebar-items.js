@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["FIRST_CALL_TRANSACTION",""]],"mod":[["error",""],["parcel",""],["service_manager",""],["sys",""]],"struct":[["BinderConnection","A connection to the Binder kernel interface."],["Handle","A connection to a Binder Service. Roughly equivalent to an sp in the libbinder framework."]],"trait":[["IInterface",""]]});

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `OwnedParcel` struct in crate `binder`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, OwnedParcel">
+
+    <title>binder::parcel::OwnedParcel - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../normalize.css">
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc struct">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'>Struct OwnedParcel</p><div class="block items"><ul><li><a href="#methods">Methods</a></li><li><a href="#implementations">Trait Implementations</a></li></ul></div><p class='location'><a href='../index.html'>binder</a>::<wbr><a href='index.html'>parcel</a></p><script>window.sidebarCurrent = {name: 'OwnedParcel', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content">
+<h1 class='fqn'><span class='in-band'>Struct <a href='../index.html'>binder</a>::<wbr><a href='index.html'>parcel</a>::<wbr><a class="struct" href=''>OwnedParcel</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a class='srclink' href='../../src/binder/parcel.rs.html#148-163' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct OwnedParcel { /* fields omitted */ }</pre><div class='docblock'><p>The main type of <code>Parcel</code>. An <code>OwnedParcel</code> is (mostly) independant of the
+underlying <code>BinderConnection</code> : it owns its underlying data buffer.</p>
+
+<p>Right now it still requires access to a <code>BinderConnection</code> though (which is
+also why <code>BinderConnection</code> is an <code>Rc&lt;RefCell&gt;</code>) in order to register
+handles to the connection&#39;s Handle HashMap. It is my hope to eventually
+break this dependency, perhaps by requiring the <code>BinderConnection</code> to be
+supplied as an argument to the <code>read_*_binder</code> functions.</p>
+</div>
+                    <h2 id='methods' class='section-header'>
+                      <a href='#methods'>Methods</a>
+                    </h2>
+                <h3 class='impl'><span class='in-band'><code>impl <a class="struct" href="../../binder/parcel/struct.OwnedParcel.html" title="struct binder::parcel::OwnedParcel">OwnedParcel</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/binder/parcel.rs.html#165-274' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.new' class="method"><span id='new.v' class='invisible'><code>fn <a href='#method.new' class='fnname'>new</a>(conn: <a class="struct" href="../../binder/struct.BinderConnection.html" title="struct binder::BinderConnection">BinderConnection</a>) -&gt; <a class="struct" href="../../binder/parcel/struct.OwnedParcel.html" title="struct binder::parcel::OwnedParcel">OwnedParcel</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/binder/parcel.rs.html#166-174' title='goto source code'>[src]</a></span></h4>
+<h4 id='method.len' class="method"><span id='len.v' class='invisible'><code>fn <a href='#method.len' class='fnname'>len</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/binder/parcel.rs.html#177-179' title='goto source code'>[src]</a></span></h4>
+<h4 id='method.set_data_len' class="method"><span id='set_data_len.v' class='invisible'><code>unsafe fn <a href='#method.set_data_len' class='fnname'>set_data_len</a>(&amp;mut self, size: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>)</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/binder/parcel.rs.html#186-188' title='goto source code'>[src]</a></span></h4>
+<h4 id='method.set_position' class="method"><span id='set_position.v' class='invisible'><code>fn <a href='#method.set_position' class='fnname'>set_position</a>(&amp;mut self, pos: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>)</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/binder/parcel.rs.html#190-192' title='goto source code'>[src]</a></span></h4>
+<h4 id='method.clear' class="method"><span id='clear.v' class='invisible'><code>fn <a href='#method.clear' class='fnname'>clear</a>(&amp;mut self)</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/binder/parcel.rs.html#194-197' title='goto source code'>[src]</a></span></h4>
+<h4 id='method.write_i32' class="method"><span id='write_i32.v' class='invisible'><code>fn <a href='#method.write_i32' class='fnname'>write_i32</a>(&amp;mut self, val: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a>)</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/binder/parcel.rs.html#203-205' title='goto source code'>[src]</a></span></h4>
+<h4 id='method.write_u32' class="method"><span id='write_u32.v' class='invisible'><code>fn <a href='#method.write_u32' class='fnname'>write_u32</a>(&amp;mut self, val: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u32.html">u32</a>)</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/binder/parcel.rs.html#207-209' title='goto source code'>[src]</a></span></h4>
+<h4 id='method.write_pointer' class="method"><span id='write_pointer.v' class='invisible'><code>fn <a href='#method.write_pointer' class='fnname'>write_pointer</a>(&amp;mut self, val: <a class="type" href="../../binder/sys/type.binder_uintptr_t.html" title="type binder::sys::binder_uintptr_t">binder_uintptr_t</a>)</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/binder/parcel.rs.html#211-214' title='goto source code'>[src]</a></span></h4>
+<h4 id='method.write_interface_token' class="method"><span id='write_interface_token.v' class='invisible'><code>fn <a href='#method.write_interface_token' class='fnname'>write_interface_token</a>(&amp;mut self, interface: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>)</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/binder/parcel.rs.html#216-220' title='goto source code'>[src]</a></span></h4>
+<h4 id='method.write_string16' class="method"><span id='write_string16.v' class='invisible'><code>fn <a href='#method.write_string16' class='fnname'>write_string16</a>(&amp;mut self, s: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>)</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/binder/parcel.rs.html#222-230' title='goto source code'>[src]</a></span></h4>
+<h4 id='method.write_strong_binder' class="method"><span id='write_strong_binder.v' class='invisible'><code>fn <a href='#method.write_strong_binder' class='fnname'>write_strong_binder</a>(&amp;mut self, handle: <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/rc/struct.Rc.html" title="struct alloc::rc::Rc">Rc</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/core/cell/struct.RefCell.html" title="struct core::cell::RefCell">RefCell</a>&lt;<a class="struct" href="../../binder/struct.Handle.html" title="struct binder::Handle">Handle</a>&gt;&gt;&gt;)</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/binder/parcel.rs.html#233-244' title='goto source code'>[src]</a></span></h4>
+<h4 id='method.write_buf' class="method"><span id='write_buf.v' class='invisible'><code>fn <a href='#method.write_buf' class='fnname'>write_buf</a>(&amp;mut self, buf: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.slice.html">&amp;[</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u8.html">u8</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.slice.html">]</a>)</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/binder/parcel.rs.html#262-271' title='goto source code'>[src]</a></span></h4>
+</div>
+            <h2 id='implementations' class='section-header'>
+              <a href='#implementations'>Trait Implementations</a>
+            </h2>
+        <h3 class='impl'><span class='in-band'><code>impl <a class="trait" href="https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html" title="trait core::fmt::Debug">Debug</a> for <a class="struct" href="../../binder/parcel/struct.OwnedParcel.html" title="struct binder::parcel::OwnedParcel">OwnedParcel</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/binder/parcel.rs.html#147' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.fmt' class="method"><span id='fmt.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#tymethod.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class="struct" href="https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html" title="struct core::fmt::Formatter">Formatter</a>) -&gt; <a class="type" href="https://doc.rust-lang.org/nightly/core/fmt/type.Result.html" title="type core::fmt::Result">Result</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/binder/parcel.rs.html#147' title='goto source code'>[src]</a></span></h4>
+<div class='docblock'><p>Formats the value using the given formatter.</p>
+</div></div><h3 class='impl'><span class='in-band'><code>impl <a class="trait" href="../../binder/parcel/trait.Parcel.html" title="trait binder::parcel::Parcel">Parcel</a> for <a class="struct" href="../../binder/parcel/struct.OwnedParcel.html" title="struct binder::parcel::OwnedParcel">OwnedParcel</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/binder/parcel.rs.html#276-299' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.data' class="method"><span id='data.v' class='invisible'><code>fn <a href='../../binder/parcel/trait.Parcel.html#tymethod.data' class='fnname'>data</a>(&amp;mut self) -&gt; &amp;mut <a class="trait" href="../../binder/parcel/trait.Reader.html" title="trait binder::parcel::Reader">Reader</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/binder/parcel.rs.html#277-279' title='goto source code'>[src]</a></span></h4>
+<h4 id='method.objects' class="method"><span id='objects.v' class='invisible'><code>fn <a href='../../binder/parcel/trait.Parcel.html#tymethod.objects' class='fnname'>objects</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.slice.html">&amp;[</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.slice.html">]</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/binder/parcel.rs.html#281-283' title='goto source code'>[src]</a></span></h4>
+<h4 id='method.conn_mut' class="method"><span id='conn_mut.v' class='invisible'><code>fn <a href='../../binder/parcel/trait.Parcel.html#tymethod.conn_mut' class='fnname'>conn_mut</a>(&amp;mut self) -&gt; &amp;mut <a class="struct" href="../../binder/struct.BinderConnection.html" title="struct binder::BinderConnection">BinderConnection</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/binder/parcel.rs.html#285-287' title='goto source code'>[src]</a></span></h4>
+<h4 id='method.has_data' class="method"><span id='has_data.v' class='invisible'><code>fn <a href='../../binder/parcel/trait.Parcel.html#tymethod.has_data' class='fnname'>has_data</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/binder/parcel.rs.html#289-291' title='goto source code'>[src]</a></span></h4>
+<h4 id='method.as_data_slice_mut' class="method"><span id='as_data_slice_mut.v' class='invisible'><code>fn <a href='../../binder/parcel/trait.Parcel.html#tymethod.as_data_slice_mut' class='fnname'>as_data_slice_mut</a>(&amp;mut self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.slice.html">&amp;mut [</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u8.html">u8</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.slice.html">]</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/binder/parcel.rs.html#293-295' title='goto source code'>[src]</a></span></h4>
+<h4 id='method.as_objects_slice_mut' class="method"><span id='as_objects_slice_mut.v' class='invisible'><code>fn <a href='../../binder/parcel/trait.Parcel.html#tymethod.as_objects_slice_mut' class='fnname'>as_objects_slice_mut</a>(&amp;mut self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.slice.html">&amp;mut [</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.slice.html">]</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/binder/parcel.rs.html#296-298' title='goto source code'>[src]</a></span></h4>
+<h4 id='method.read_buf' class="method"><span id='read_buf.v' class='invisible'><code>fn <a href='../../binder/parcel/trait.Parcel.html#method.read_buf' class='fnname'>read_buf</a>(&amp;mut self, buf: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.slice.html">&amp;mut [</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u8.html">u8</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.slice.html">]</a>) -&gt; <a class="type" href="https://doc.rust-lang.org/nightly/std/io/error/type.Result.html" title="type std::io::error::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">()</a>&gt;</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/binder/parcel.rs.html#39-45' title='goto source code'>[src]</a></span></h4>
+<h4 id='method.read_i32' class="method"><span id='read_i32.v' class='invisible'><code>fn <a href='../../binder/parcel/trait.Parcel.html#method.read_i32' class='fnname'>read_i32</a>(&amp;mut self) -&gt; <a class="type" href="https://doc.rust-lang.org/nightly/std/io/error/type.Result.html" title="type std::io::error::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.i32.html">i32</a>&gt;</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/binder/parcel.rs.html#59-61' title='goto source code'>[src]</a></span></h4>
+<h4 id='method.read_u32' class="method"><span id='read_u32.v' class='invisible'><code>fn <a href='../../binder/parcel/trait.Parcel.html#method.read_u32' class='fnname'>read_u32</a>(&amp;mut self) -&gt; <a class="type" href="https://doc.rust-lang.org/nightly/std/io/error/type.Result.html" title="type std::io::error::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u32.html">u32</a>&gt;</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/binder/parcel.rs.html#63-65' title='goto source code'>[src]</a></span></h4>
+<h4 id='method.read_string16' class="method"><span id='read_string16.v' class='invisible'><code>fn <a href='../../binder/parcel/trait.Parcel.html#method.read_string16' class='fnname'>read_string16</a>(&amp;mut self) -&gt; <a class="type" href="https://doc.rust-lang.org/nightly/std/io/error/type.Result.html" title="type std::io::error::Result">Result</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/string/struct.String.html" title="struct alloc::string::String">String</a>&gt;</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/binder/parcel.rs.html#67-85' title='goto source code'>[src]</a></span></h4>
+<h4 id='method.read_strong_binder' class="method"><span id='read_strong_binder.v' class='invisible'><code>fn <a href='../../binder/parcel/trait.Parcel.html#method.read_strong_binder' class='fnname'>read_strong_binder</a>(&amp;mut self) -&gt; <a class="type" href="../../binder/error/type.BinderResult.html" title="type binder::error::BinderResult">BinderResult</a>&lt;<a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/rc/struct.Rc.html" title="struct alloc::rc::Rc">Rc</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/core/cell/struct.RefCell.html" title="struct core::cell::RefCell">RefCell</a>&lt;<a class="struct" href="../../binder/struct.Handle.html" title="struct binder::Handle">Handle</a>&gt;&gt;&gt;&gt;</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/binder/parcel.rs.html#88-108' title='goto source code'>[src]</a></span></h4>
+<h4 id='method.read_object' class="method"><span id='read_object.v' class='invisible'><code>fn <a href='../../binder/parcel/trait.Parcel.html#method.read_object' class='fnname'>read_object</a>(&amp;mut self, null_metadata: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a>) -&gt; <a class="type" href="../../binder/error/type.Result.html" title="type binder::error::Result">Result</a>&lt;<a class="struct" href="../../binder/sys/struct.flat_binder_object.html" title="struct binder::sys::flat_binder_object">flat_binder_object</a>&gt;</code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/binder/parcel.rs.html#111-129' title='goto source code'>[src]</a></span></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "binder";
+    </script>
+    <script src="../../main.js"></script>
+    <script defer src="../../search-index.js"></script>
+</body>
+</html>

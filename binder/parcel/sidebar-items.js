@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["create_binder_parcel",""]],"struct":[["BinderParcel",""],["OwnedParcel","The main type of `Parcel`. An `OwnedParcel` is (mostly) independant of the underlying `BinderConnection` : it owns its underlying data buffer."]],"trait":[["Parcel",""],["Reader",""]]});
