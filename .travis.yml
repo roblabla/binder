@@ -1,22 +1,17 @@
 dist: trusty
 sudo: false
 language: android
-android:
-  components:
-  - tools
-  - platform-tools
-  - build-tools-19.1.0
-  - android-24
 matrix:
   include:
   # arm-linux-androideabi
-  - os: linux
-    env:
+  - env:
     - TARGET=arm-linux-androideabi
     - SIM_ABI=armeabi-v7a
     - SIM_TAG=android-24
     android:
       components:
+      - build-tools-19.1.0
+      - android-24
       - sys-img-armeabi-v7a-android-24
 before_install:
 - set -euo pipefail
