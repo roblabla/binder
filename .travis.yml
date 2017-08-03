@@ -14,16 +14,18 @@ matrix:
     env:
     - TARGET=arm-linux-androideabi
     - SIM_ABI=armeabi-v7a
+    - SIM_TAG=android-24
     android:
       components:
       - sys-img-armeabi-v7a-android-24
 before_install:
+- set -euo pipefail
 - curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain nightly
 - source ~/.cargo/env
 install:
 - rustup target add $TARGET
 before_script:
-- echo no | android create avd --force -n test -t android-24 --abi $SIM_ABI
+- echo no | android create avd --force -n test -t $SIM_TAG --abi $SIM_ABI
 - QEMU_AUDIO_DRV=none emulator -avd test -no-window &
 - adb wait-for-device
 - adb shell input keyevent 82 &
