@@ -25,7 +25,7 @@ install:
 - rustup target add $TARGET
 before_script:
 - echo no | android create avd --force -n test -t android-24 --abi $SIM_ABI
-- emulator -avd test -no-audio -no-window &
+- QEMU_AUDIO_DRV=none emulator -avd test -no-window &
 - adb wait-for-device
 - adb shell input keyevent 82 &
 script:
