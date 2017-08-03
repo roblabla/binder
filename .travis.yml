@@ -41,6 +41,3 @@ deploy:
   local_dir: target/arm-linux-androideabi/doc
   on:
     branch: master
-
-env:
-  global:
