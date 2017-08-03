@@ -31,9 +31,8 @@ before_script:
 - adb shell input keyevent 82 &
 - mkdir .cargo
 - echo "[target.${TARGET}]" >> .cargo/config
-- echo linker = "${TARGET}-gcc" >> .cargo/config
-- echo ar = "${TARGET}-ar" >> .cargo/config
-- cat .cargo/config
+- echo "linker = \"${TARGET}-gcc\"" >> .cargo/config
+- echo "ar = \"${TARGET}-ar\"" >> .cargo/config
 script:
 - cargo build --target=$TARGET
 - cargo doc --target=$TARGET
