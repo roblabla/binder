@@ -14,7 +14,7 @@ matrix:
       - android-24
       - sys-img-armeabi-v7a-android-24
 before_install:
-- set -euo pipefail
+- set -eo pipefail
 - curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain nightly
 - source ~/.cargo/env
 install:
