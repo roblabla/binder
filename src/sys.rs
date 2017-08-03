@@ -259,25 +259,24 @@ pub enum ReturnProtocol {
 impl ReturnProtocol {
     pub fn from_primitive(u: i32) -> Option<ReturnProtocol> {
         use self::ReturnProtocol::*;
-            // TODO: Use the io/ior/iow macros
-        if u == ior!('r', 0, size_of::<i32>()) { Some(Error) }
-        else if u == io!('r', 1) { Some(Ok) }
-        else if u == ior!('r', 2, size_of::<binder_transaction_data>()) { Some(Transaction) }
-        else if u == ior!('r', 3, size_of::<binder_transaction_data>()) { Some(Reply) }
-        else if u == ior!('r', 4, size_of::<i32>()) { Some(AcquireResult) }
-        else if u == io!('r', 5) { Some(DeadReply) }
-        else if u == io!('r', 6) { Some(TransactionComplete) }
-        else if u == ior!('r', 7, size_of::<binder_ptr_cookie>()) { Some(IncRefs) }
-        else if u == ior!('r', 8, size_of::<binder_ptr_cookie>()) { Some(Acquire) }
-        else if u == ior!('r', 9, size_of::<binder_ptr_cookie>()) { Some(Release) }
-        else if u == ior!('r', 10, size_of::<binder_ptr_cookie>()) { Some(DecRefs) }
-        else if u == ior!('r', 11, size_of::<binder_pri_ptr_cookie>()) { Some(AttemptAcquire) }
-        else if u == io!('r', 12) { Some(Noop) }
-        else if u == io!('r', 13) { Some(SpawnLooper) }
-        else if u == io!('r', 14) { Some(Finished) }
-        else if u == ior!('r', 15, size_of::<binder_uintptr_t>()) { Some(DeadBinder) }
-        else if u == ior!('r', 16, size_of::<binder_uintptr_t>()) { Some(ClearDeathNotificationDone) }
-        else if u == io!('r', 17) { Some(FailedReply) }
+        if u == ior!('r', 0, size_of::<i32>()) as i32 { Some(Error) }
+        else if u == io!('r', 1) as i32 { Some(Ok) }
+        else if u == ior!('r', 2, size_of::<binder_transaction_data>()) as i32 { Some(Transaction) }
+        else if u == ior!('r', 3, size_of::<binder_transaction_data>()) as i32 { Some(Reply) }
+        else if u == ior!('r', 4, size_of::<i32>()) as i32 { Some(AcquireResult) }
+        else if u == io!('r', 5) as i32 { Some(DeadReply) }
+        else if u == io!('r', 6) as i32 { Some(TransactionComplete) }
+        else if u == ior!('r', 7, size_of::<binder_ptr_cookie>()) as i32 { Some(IncRefs) }
+        else if u == ior!('r', 8, size_of::<binder_ptr_cookie>()) as i32 { Some(Acquire) }
+        else if u == ior!('r', 9, size_of::<binder_ptr_cookie>()) as i32 { Some(Release) }
+        else if u == ior!('r', 10, size_of::<binder_ptr_cookie>()) as i32 { Some(DecRefs) }
+        else if u == ior!('r', 11, size_of::<binder_pri_ptr_cookie>()) as i32 { Some(AttemptAcquire) }
+        else if u == io!('r', 12) as i32 { Some(Noop) }
+        else if u == io!('r', 13) as i32 { Some(SpawnLooper) }
+        else if u == io!('r', 14) as i32 { Some(Finished) }
+        else if u == ior!('r', 15, size_of::<binder_uintptr_t>()) as i32 { Some(DeadBinder) }
+        else if u == ior!('r', 16, size_of::<binder_uintptr_t>()) as i32 { Some(ClearDeathNotificationDone) }
+        else if u == io!('r', 17) as i32 { Some(FailedReply) }
         else { None }
     }
 }
