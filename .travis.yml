@@ -51,5 +51,6 @@ after_success:
 - git init
 - git remote add origin "git@github.com:roblabla/binder"
 - git checkout -b gh-pages
-- git commit -am "Docs"
+- git add .
+- git commit -m "Docs"
 - git push --force origin gh-pages
