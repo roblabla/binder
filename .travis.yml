@@ -18,7 +18,8 @@ before_install:
 - set -eo pipefail
 - git clone https://github.com/dekalo-stanislav/android-ndk $HOME/android-ndk
 - export ANDROID_NDK_HOME=$HOME/android-ndk
-- $ANDROID_NDK_HOME/build/tools/make_standalone_toolchain.py --arch $NDK_ARCH --install-dir $HOME/toolchain
+# Minimum API level is 21, as that's when getpagesize got introduced
+- $ANDROID_NDK_HOME/build/tools/make_standalone_toolchain.py --arch $NDK_ARCH --api 21 --install-dir $HOME/toolchain
 - export PATH=$HOME/toolchain/bin:$PATH
 - curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain nightly
 - source ~/.cargo/env
