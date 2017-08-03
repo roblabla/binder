@@ -6,6 +6,7 @@ matrix:
   # arm-linux-androideabi
   - env:
     - TARGET=arm-linux-androideabi
+    - NDK_ARCH=arm
     - SIM_ABI=armeabi-v7a
     - SIM_TAG=android-24
     android:
@@ -15,6 +16,10 @@ matrix:
       - sys-img-armeabi-v7a-android-24
 before_install:
 - set -eo pipefail
+- curl 'https://dl.google.com/android/repository/android-ndk-r15c-linux-x86_64.zip' -o '/tmp/android-ndk-r15c-linux-x86_64.zip'
+- unzip /tmp/android-ndk-r15c-linux-x86_64.zip -d $HOME
+- $HOME/android-ndk-r15c/build/tools/make_standalone_toolchain.py --arch $NDK_ARCH --install-dir $HOME/toolchain
+- export PATH=$HOME/toolchain/bin:$PATH
 - curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain nightly
 - source ~/.cargo/env
 install:
