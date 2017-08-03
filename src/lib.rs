@@ -542,13 +542,4 @@ impl BinderConnection {
 
 #[cfg(test)]
 mod tests {
-    #[test]
-    fn check_binder_opens() {
-        let mut binder = super::BinderConnection::open().unwrap();
-        let mut parcel = super::Parcel::default();
-        parcel.write_u32(0);
-        parcel.write_string16("android.os.IServiceManager");
-        parcel.write_string16("alt_svc_mgr");
-        binder.call(0, 2, &mut parcel);
-    }
 }
