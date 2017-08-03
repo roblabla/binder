@@ -29,6 +29,9 @@ before_script:
 - QEMU_AUDIO_DRV=none emulator -avd test -no-window &
 - adb wait-for-device
 - adb shell input keyevent 82 &
+- echo [target.$TARGET] >> .cargo/config
+- echo linker = "$TARGET-gcc" >> .cargo/config
+- echo ar = "$TARGET-ar" >> .cargo/config
 script:
 - cargo build --target=$TARGET
 - cargo doc --target=$TARGET
