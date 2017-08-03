@@ -25,9 +25,9 @@ before_script:
 - adb wait-for-device
 - adb shell input keyevent 82 &
 script:
-- cargo build
-- cargo doc
-- cargo test --no-run --message-format=json | jq -r "select(.profile.test == true)
+- cargo build --target=$TARGET
+- cargo doc --target=$TARGET
+- cargo test --target=$TARGET --no-run --message-format=json | jq -r "select(.profile.test == true)
   | .filenames[]" | xargs -I "{}" sh -c "adb push {} /data/local/tmp && adb shell
   /data/local/tmp/$(basename {})"
 deploy:
