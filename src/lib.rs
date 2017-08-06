@@ -22,6 +22,7 @@
 //!
 #![feature(conservative_impl_trait)]
 #![feature(const_fn)]
+#![feature(associated_consts)]
 #[macro_use]
 extern crate log;
 extern crate libc;
@@ -386,10 +387,8 @@ impl BinderConnection {
         data.offsets_size = msg.as_objects_slice_mut().len() as sys::binder_size_t;
         // TODO: Support sending errors to the remote process. It's a bit weird
         // but there is this thing called the statusBuffer ?
-        unsafe {
-            data.data.ptr.buffer = msg.as_data_slice_mut().as_ptr() as sys::binder_uintptr_t;
-            data.data.ptr.offsets = msg.as_objects_slice_mut().as_ptr() as sys::binder_uintptr_t;
-        }
+        data.buffer = msg.as_data_slice_mut().as_ptr() as sys::binder_uintptr_t;
+        data.offsets = msg.as_objects_slice_mut().as_ptr() as sys::binder_uintptr_t;
 
         let mut out = OwnedParcel::new(self.clone());
         let mut _in = OwnedParcel::new(self.clone());
@@ -422,7 +421,7 @@ impl BinderConnection {
                                           txn.data.ptr.offsets as *mut usize,
                                           txn.offsets_size as usize)
                         };
-                        if txn.flags & sys::TF_STATUS_CODE.bits() == 0 {
+                        if txn.flags & sys::TransactionFlags::STATUS_CODE.bits() == 0 {
                             println!("Returning from call");
                             return Ok(buffer)
                         } else {

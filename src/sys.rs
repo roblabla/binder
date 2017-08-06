@@ -5,9 +5,115 @@
 //! all the datastructures necessary to communicate with the kernel drivers,
 //! along with wrappers around all the ioctls.
 //!
-// TODO: Document everything in this crate. I could probably document most of
-// it by scourging through my notes.
-
+//! The documentation will assume the Linux kernel driver for Android is used,
+//! and makes use of some implementation details of that driver to explain the
+//! behavior of the different ioctls. In particular, OpenBinder (the original
+//! Binder implementation for BeOS) is only referred to when it explains
+//! something in the current implementation.
+//!
+//! # Usage
+//!
+//! ## Version checking
+//!
+//! This module exposes the low-level primitives given to us by the kernel.
+//! The first thing to do when using those primitives is to check if the kernel
+//! version matches the implemented version.
+//!
+//! ```
+//! use binder::sys;
+//!
+//! let binder = std::fs::File::open("/dev/binder").unwrap();
+//! let mut version = sys::binder_version { protocol_version: 0 }
+//! sys::binder_version(binder.as_raw_fd(), &mut binder_version);
+//! if version.protocol_version != sys::CurrentProtocolVersion {
+//!   panic!("Binder version mismatch")
+//! }
+//! ```
+//!
+//! ## Communicating with binder_write_read
+//!
+//! The `binder_write_read` ioctl is used as a replacement of `read` and `write`
+//! syscalls. Only whole message should be sent and received with the ioctl.
+//!
+//! In the `write_buf`, you should send an `i32` "command type", corresponding
+//! to a `CommandProtocol` constant, followed by the command's data. You can
+//! find what type this data is in the `CommandProtocol` documentation.
+//!
+//! The `read_buf` will contain one `i32` "return type", corresponding to a
+//! `ReturnProtocol` constant, followed by the reply's data. You can find what
+//! type this data is in the `ReturnProtocol` documentation.
+//!
+//! Here's an example of using `binder_write_read` to notify the Kernel that we
+//! entered a Looper.
+//! TODO
+//!
+//! ```
+//! # use binder::sys;
+//! # let binder = std::fs::File::open("/dev/binder").unwrap();
+//! let read_buf = [0u8; 256];
+//! let mut buf = binder_write_read {
+//!   write_size: write_buf.len()
+//!   write_consumed: 0,
+//!   write_buf: write_buf.as_ptr(),
+//!   read_size: read_buf.len(),
+//!   read_consumed: 0,
+//!   read_buf: read_buf.as_mut_ptr()
+//! };
+//! loop {
+//!   sys::binder_write_read(binder.as_raw_fd(), &mut buf);
+//!   let read_slice = buf.read_buf[..buf.read_consumed];
+//! }
+//! ```
+//!
+//! ## Transactions
+//!
+//! - TODO: FreeBuffer
+//!
+//! ```
+//! let data : binder_transaction_data = unsafe { std::mem::zeroed() };
+//! // Handle 0 is magic. It is a reference to the "Context Manager".
+//! data.target.handle = 0;
+//! // Code for InterfaceTransaction.
+//! data.code = 1598968902;
+//! data.buffer = 0; // TODO
+//! data.offsets = 0; // TODO
+//!
+//! let write_buf = [0u8; size_of::<binder_transaction_data>() + 4];
+//! {
+//!     let write_cursor = Cursor::new(&mut write_buf);
+//!     write_cursor.write_i32::<NativeEndian>(CommandProtocol::Transaction as i32);
+//!     // TODO: This sucks
+//!     write_cursor.write_exact(std::mem::transmute::<binder_transaction_data, [u8; size_of::<binder_transaction_data>()>(data));
+//! }
+//! ```
+//!
+//! ## Resource management
+//!
+//! TODO: Write the docs about
+//!
+//! - IncRefs
+//! - Acquire
+//! - Release
+//! - DecRefs
+//! - IncRefsDone
+//! - DecRefsDone
+//! - AttemptAcquire
+//!
+//! ## Thread management
+//!
+//! TODO: Write the documentation about :
+//!
+//! - SpawnLooper/RegisterLooper/EnterLooper/ExitLooper
+//! - binder_set_max_thread
+//!
+//! ## Death notifications
+//!
+//! TODO: Request/Clear DeathNotification/ DeadBinder ???
+//!
+// TODO: Hyperlink the docs
+#![deny(missing_docs)]
+// TODO: Add a few missing primitives, maybe with some checks to make sure the
+// kernel actually implements it ?
 #![allow(bad_style)]
 
 use std::fmt::{Debug, Formatter, Error as FmtError};
@@ -24,8 +130,10 @@ pub type binder_uintptr_t = u64;
 
 use libc::{pid_t, uid_t};
 
+/// The version that the rust-binder library implements
 #[cfg(BINDER_IPC_32BIT)]
 pub const CurrentProtocolVersion: i32 = 7;
+/// The version that the rust-binder library implements
 #[cfg(not(BINDER_IPC_32BIT))]
 pub const CurrentProtocolVersion: i32 = 8;
 
@@ -33,41 +141,69 @@ pub(crate) const fn pack_chars(c1: u8, c2: u8, c3: u8, c4: u8) -> u32 {
     ((((c1 as u32)<<24)) | (((c2 as u32)<<16)) | (((c3 as u32)<<8)) | (c4 as u32))
 }
 
+/// The type of a Flat Binder Object.
+///
+/// Used by the kernel to figure out how to map the object from one process
+/// space to the other.
 #[repr(u32)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum BinderType {
+    /// A strong pointer to a local Binder object.
     Binder = pack_chars(b's', b'b', b'*', 0x85),
+    /// A weak pointer to a local Binder object.
     WeakBinder = pack_chars(b'w', b'b', b'*', 0x85),
+    /// A strong pointer to a remote Binder object.
     Handle = pack_chars(b's', b'h', b'*', 0x85),
+    /// A weak pointer to a remote Binder object.
     WeakHandle = pack_chars(b'w', b'h', b'*', 0x85),
+    /// A file descriptor.
     Fd = pack_chars(b'f', b'd', b'*', 0x85),
 }
 
-// TODO: Convert to consts or bitflags
-#[repr(u32)]
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
-pub enum FlatBinderFlag {
-    PriorityMask = 0xff,
-    AcceptsFds = 0x100,
+bitflags! {
+    /// Flags to set on `flat_binder_object.flags`
+    pub struct FlatBinderFlags : u32 {
+        /// The priority. The kernel uses this value to set the process priority
+        const PRIORITY_MASK = 0xff;
+        /// Whether or not we're allowed to accept FDs
+        const ACCEPT_FDS = 0x100;
+    }
 }
 
+/// A binder object to be sent to another process.
 #[repr(C)]
 #[derive(Copy)]
 pub struct flat_binder_object {
+    /// The type of this object. Used by the kernel to figure out how to send
+    /// the object to another process.
+    ///
+    /// You should use `BinderType` to fill this value.
     pub type_: u32,
+    /// Flags that change the behavior of the object. See `FlatBinderFlags`.
     pub flags: u32,
-    pub target: flat_binder_object__bindgen_ty_1,
+    /// The content of the object.
+    pub target: flat_binder_object_target,
+    /// A transaction identifier. In Android's libbinder, this is a pointer to
+    /// the underlying object.
     pub cookie: binder_uintptr_t,
 }
 
+// TODO: It'd be super-nice if we had anonymous nested unions in rust...
+/// The object contained inside of a `flat_binder_object`.
 #[repr(C)]
 #[derive(Copy)]
-pub union flat_binder_object__bindgen_ty_1 {
+pub union flat_binder_object_target {
+    /// A pointer to an object in your local address space.
+    ///
+    /// The kernel will turn it into a Handle before sending it into another
+    /// process. When that process sends a message to it, the kernel will turn
+    /// it back into a pointer to pass to the user in `binder_transaction_data`.
     pub binder: binder_uintptr_t,
+    /// A handle to a remote binder object.
     pub handle: u32,
 }
 
-impl Debug for flat_binder_object__bindgen_ty_1 {
+impl Debug for flat_binder_object_target {
     // Worst-case scenario, we print some stack data. It's not too bad.
     // TODO: Use {:p} ?
     fn fmt(&self, f: &mut Formatter) -> Result<(), FmtError> {
@@ -77,7 +213,7 @@ impl Debug for flat_binder_object__bindgen_ty_1 {
     }
 }
 
-impl Clone for flat_binder_object__bindgen_ty_1 {
+impl Clone for flat_binder_object_target {
     fn clone(&self) -> Self { *self }
 }
 
@@ -85,14 +221,21 @@ impl Clone for flat_binder_object {
     fn clone(&self) -> Self { *self }
 }
 
+/// A buffer for use with the `binder_write_read`
 #[repr(C)]
 #[derive(Debug, Copy)]
 pub struct binder_write_read {
+    /// The size of the `write_buffer` in bytes
     pub write_size: binder_size_t,
+    /// The amount of bytes the kernel read from the `write_buffer`.
     pub write_consumed: binder_size_t,
+    /// A pointer of `write_size` bytes to send.
     pub write_buffer: binder_uintptr_t,
+    /// The size of the `read_buffer` in bytes
     pub read_size: binder_size_t,
+    /// The amount of bytes the kernel wrote to the `read_buffer`.
     pub read_consumed: binder_size_t,
+    /// A pointer of `read_size` bytes to read messages from the kernel.
     pub read_buffer: binder_uintptr_t,
 }
 
@@ -100,6 +243,7 @@ impl Clone for binder_write_read {
     fn clone(&self) -> Self { *self }
 }
 
+/// A wrapper around an i32 specifying the implemented Protocol Version.
 #[repr(C)]
 #[derive(Debug, Copy)]
 pub struct binder_version {
@@ -111,32 +255,63 @@ impl Clone for binder_version {
 }
 
 bitflags! {
+    /// Flags to set on `binder_transaction_data.flags` to modify its behavior.
     pub struct TransactionFlags: u32 {
-        const TF_ONE_WAY = 0x01;
-        const TF_ROOT_OBJECT = 0x04;
-        const TF_STATUS_CODE = 0x08;
-        const TF_ACCEPT_FDS = 0x10;
+        /// The request doesn't expect a reply.
+        const ONE_WAY = 0x01;
+        /// Contents are the component's root object.
+        ///
+        /// Unused by android or the kernel.
+        const ROOT_OBJECT = 0x04;
+        /// Contents are a 32-bit status code. Usually set when the reply
+        /// contains an error.
+        const STATUS_CODE = 0x08;
+        /// Allow replies with File Descriptor. Always set on Android.
+        const ACCEPT_FDS = 0x10;
     }
 }
 
+// TODO: Document buffer free-ing behavior.
+/// The `Transaction` command's data.
 #[repr(C)]
-#[derive(Debug, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub struct binder_transaction_data {
+    /// The target to the transaction call. Can either be a remote handle, or a
+    /// local pointer.
     pub target: binder_transaction_data__bindgen_ty_1,
+    /// An identifier for the underlying object's handle. Used to make sure that
+    /// the kernel and client talk about the same object.
+    ///
+    /// As an implementation detail, Android's libbinder puts the pointer of the
+    /// underlying `IBinder` object in this place.
     pub cookie: binder_uintptr_t,
+    /// An identifier for the method to call
     pub code: u32,
+    /// 
     pub flags: u32,
+    /// The pid of the caller, should be 0 when sending.
     pub sender_pid: pid_t,
+    /// The euid of the caller, should be 0 when sending.
     pub sender_euid: uid_t,
+    /// The size of the `buffer` slice in u8.
     pub data_size: binder_size_t,
+    /// The size of the `offsets` slice in usize.
     pub offsets_size: binder_size_t,
-    pub data: binder_transaction_data__bindgen_ty_2,
+    /// An array of u8.
+    pub buffer: binder_uintptr_t,
+    /// An array of usize.
+    pub offsets: binder_uintptr_t
 }
 
 #[repr(C)]
 #[derive(Copy)]
 pub union binder_transaction_data__bindgen_ty_1 {
+    /// A handle to a remote binder object.
     pub handle: u32,
+    /// A pointer to an object in your local address space.
+    ///
+    /// Mostly unused, as you most likely don't need the kernel roundtrip just
+    /// to call a function on a pointer already on your address space.
     pub ptr: binder_uintptr_t,
 }
 
@@ -150,41 +325,6 @@ impl Debug for binder_transaction_data__bindgen_ty_1 {
 }
 
 impl Clone for binder_transaction_data__bindgen_ty_1 {
-    fn clone(&self) -> Self { *self }
-}
-
-#[repr(C)]
-#[derive(Copy)]
-pub union binder_transaction_data__bindgen_ty_2 {
-    pub ptr: binder_transaction_data__bindgen_ty_2__bindgen_ty_1,
-    pub buf: [u8; 8usize],
-}
-
-impl Debug for binder_transaction_data__bindgen_ty_2 {
-    // Worst-case scenario, we print some stack data. It's not too bad.
-    fn fmt(&self, f: &mut Formatter) -> Result<(), FmtError> {
-        unsafe {
-            write!(f, "union {{ ptr = {:?}, buf = {:?} }}", self.ptr, self.buf)
-        }
-    }
-}
-
-#[repr(C)]
-#[derive(Debug, Copy)]
-pub struct binder_transaction_data__bindgen_ty_2__bindgen_ty_1 {
-    pub buffer: binder_uintptr_t,
-    pub offsets: binder_uintptr_t,
-}
-
-impl Clone for binder_transaction_data__bindgen_ty_2__bindgen_ty_1 {
-    fn clone(&self) -> Self { *self }
-}
-
-impl Clone for binder_transaction_data__bindgen_ty_2 {
-    fn clone(&self) -> Self { *self }
-}
-
-impl Clone for binder_transaction_data {
     fn clone(&self) -> Self { *self }
 }
 
@@ -233,30 +373,60 @@ impl Clone for binder_pri_ptr_cookie {
     fn clone(&self) -> Self { *self }
 }
 
+/// The Return Protocol defines how the binder kernel driver sends commands back
+/// to the process.
+///
+/// It is organized as an i32 defining the type of command
+/// received, followed by some optional data, whose size depends on the command
+/// type. You can cast a `ReturnProtocol` variant to an i32, e.g.
+/// `CommandProtocol::Transaction as i32`.
 #[repr(i32)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum ReturnProtocol {
+    /// An error occured. Returns an `i32`.
+    ///
+    /// The `i32` is a status code that can be converted to a `BinderError`
+    /// with `BinderError::from()`.
     Error = ior!('r', 0, size_of::<i32>()) as i32,
+    /// The last command succeeded. Doesn't take any data.
     Ok = io!('r', 1) as i32,
+    /// A transaction was received. Takes a `binder_transaction_data`.
     Transaction = ior!('r', 2, size_of::<binder_transaction_data>()) as i32,
+    /// A reply to the last transaction was received. Takes a
+    /// `binder_transaction_data`.
     Reply = ior!('r', 3, size_of::<binder_transaction_data>()) as i32,
+    /// TODO: ???. Takes an `i32`.
     AcquireResult = ior!('r', 4, size_of::<i32>()) as i32,
+    /// TODO: ???. Doesn't take any data.
     DeadReply = io!('r', 5) as i32,
+    /// TODO: ???. Doesn't take any data.
     TransactionComplete = io!('r', 6) as i32,
+    /// TODO: ???. Takes a `binder_ptr_cookie`.
     IncRefs = ior!('r', 7, size_of::<binder_ptr_cookie>()) as i32,
+    /// TODO: ???. Takes a `binder_ptr_cookie`.
     Acquire = ior!('r', 8, size_of::<binder_ptr_cookie>()) as i32,
+    /// TODO: ???. Takes a `binder_ptr_cookie`.
     Release = ior!('r', 9, size_of::<binder_ptr_cookie>()) as i32,
+    /// TODO: ???. Takes a `binder_ptr_cookie`.
     DecRefs = ior!('r', 10, size_of::<binder_ptr_cookie>()) as i32,
+    /// TODO: ???. Takes a `binder_pri_ptr_cookie`.
     AttemptAcquire = ior!('r', 11, size_of::<binder_pri_ptr_cookie>()) as i32,
+    /// TODO: ???. Doesn't take any data.
     Noop = io!('r', 12) as i32,
+    /// TODO: ???. Doesn't take any data.
     SpawnLooper = io!('r', 13) as i32,
+    /// TODO: ???. Doesn't take any data.
     Finished = io!('r', 14) as i32,
+    /// TODO: ???. Takes a `binder_uintptr_t`.
     DeadBinder = ior!('r', 15, size_of::<binder_uintptr_t>()) as i32,
+    /// TODO: ???. Takes a `binder_uintptr_t`.
     ClearDeathNotificationDone = ior!('r', 16, size_of::<binder_uintptr_t>()) as i32,
+    /// TODO: ???. Doesn't take any data.
     FailedReply = io!('r', 17) as i32,
 }
 
 impl ReturnProtocol {
+    /// Turns an i32 into its corresponding ReturnProtocol instance.
     pub fn from_primitive(u: i32) -> Option<ReturnProtocol> {
         use self::ReturnProtocol::*;
         if u == ior!('r', 0, size_of::<i32>()) as i32 { Some(Error) }
@@ -281,37 +451,118 @@ impl ReturnProtocol {
     }
 }
 
+/// The Command Protocol defines how to send commands to the binder kernel
+/// driver.
+///
+/// It is organized as an i32 defining the type of command to send, followed by
+/// some optional data, whose size depends on the command type.
+///
+/// You can cast a `CommandProtocol` variant to an u32, e.g.
+/// `CommandProtocol::Transaction as u32`.
 #[repr(u32)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum CommandProtocol {
+    /// Make a remote method call. Takes a `binder_transaction_data`.
+    ///
+    /// A Binder can handle multiple methods, each
+    /// identified by a number. When making a call, you should set
+    /// `binder_transaction_data.target` to the handle of the Binder you want
+    /// to call, `binder_transaction_data.code` to the method number, and
+    /// `binder_transaction_data.data` and `binder_transaction_data.offsets` to
+    /// buffers corresponding to the method's arguments. Everything else should
+    /// be set to 0.
     Transaction = iow!('c', 0, size_of::<binder_transaction_data>()) as u32,
+    /// Send a reply to the last Transaction. Takes a `binder_transaction_data`.
+    ///
+    /// Each `Transaction` should have a corresponding `Reply`, unless that
+    /// `Transaction` had the `ONE_WAY` flag set. Otherwise, the kernel will
+    /// assume that the thread is "Busy" and won't send more transactions to it.
     Reply = iow!('c', 1, size_of::<binder_transaction_data>()) as u32,
+    /// TODO: ???. Takes an i32
     AcquireResult = iow!('c', 2, size_of::<i32>()) as u32,
+    /// Free a buffer acquired from a `Reply` response. Takes a
+    /// `binder_uintptr_t`.
+    ///
+    /// The given pointer is the corresponding `binder_transaction_data.buffer`.
+    /// It will free both the buffer and the offsets array. Accessing them after
+    /// freeing them is Undefined Behavior.
     FreeBuffer = iow!('c', 3, size_of::<binder_uintptr_t>()) as u32,
+    /// TODO: ???. Takes a `u32`
     IncRefs = iow!('c', 4, size_of::<u32>()) as u32,
+    /// TODO: ???. Takes a `u32`
     Acquire = iow!('c', 5, size_of::<u32>()) as u32,
+    /// TODO: ???. Takes a `u32`
     Release = iow!('c', 6, size_of::<u32>()) as u32,
+    /// TODO: ???. Takes a `u32`
     DecRefs = iow!('c', 7, size_of::<u32>()) as u32,
+    /// TODO: ???. Takes a `binder_ptr_cookie`
     IncRefsDone = iow!('c', 8, size_of::<binder_ptr_cookie>()) as u32,
+    /// TODO: ???. Takes a `binder_ptr_cookie`
     AcquireDone = iow!('c', 9, size_of::<binder_ptr_cookie>()) as u32,
+    /// TODO: ???. Takes a `binder_pri_desc`
     AttemptAcquire = iow!('c', 10, size_of::<binder_pri_desc>()) as u32,
+    /// Tells the kernel driver that the current thread entered the command handling
+    /// loop. Doesn't take any additional data.
+    ///
+    /// This method must be used by subthreads, the thread owning the Driver
+    /// instance should use `EnterLooper`.
     RegisterLooper = io!('c', 11) as u32,
+    /// Tells the driver that the current thread entered the command handling
+    /// loop. Doesn't take any additional data.
+    ///
+    /// This method must be used by the thread which owns the Driver instance,
+    /// subthreads should use `RegisterLooper`.
     EnterLooper = io!('c', 12) as u32,
+    /// TODO: ???. Doesn't take any additional data
     ExitLooper = io!('c', 13) as u32,
+    /// TODO: ???. Takes a `binder_handle_cookie`
     RequestDeathNotification = iow!('c', 14, size_of::<binder_handle_cookie>()) as u32,
+    /// TODO: ???. Takes a `binder_handle_cookie`
     ClearDeathNotification = iow!('c', 15, size_of::<binder_handle_cookie>()) as u32,
+    /// TODO: ???. Takes a `binder_uintptr_t`
     DeadBinderDone = iow!('c', 16, size_of::<binder_uintptr_t>()) as u32,
 }
 
+// TODO: FromPrimitive for CommandProtocol
+
 ioctl! {
-    /// The main ioctl, allows the binder protocol to advance.
+    /// The main ioctl, allows to communicate with the binder kernel process,
+    /// and potentially other binder clients.
     readwrite binder_write_read with b'b', 1; binder_write_read
 }
-ioctl!(write_ptr binder_set_idle_timeout with b'b', 3; i64);
-ioctl!(write_ptr binder_set_max_threads with b'b', 5; u32);
-ioctl!(write_ptr binder_set_idle_priority with b'b', 6; i32);
+ioctl! {
+    /// TODO: Unused in kernel 4.9. Seems to be a remnant of openbinder, used in
+    /// BeOS.
+    write_ptr binder_set_idle_timeout with b'b', 3; i64
+}
+ioctl! {
+    /// Sets the max amount of threads the kernel can request the process to
+    /// spawn.
+    ///
+    /// When the kernel driver detects that it has no more active threads to
+    /// send data (such as transactions) to, it may ask that process to start
+    /// another thread to deal with the excess of messages, through the
+    /// `BinderReply::SpawnLooper` command. The kernel may do this until it hits
+    /// the value set by this function.
+    ///
+    /// This value doesn't prevent one to spawn more threads than the maximum,
+    /// however. It simply controls the amount of threads the kernel may ask you
+    /// to spawn.
+    ///
+    /// By default, the value is equal to 0, meaning the kernel will never ask
+    /// for more threads.
+    write_ptr binder_set_max_threads with b'b', 5; u32
+}
+ioctl! {
+    /// TODO: Unused in kernel 4.9. Seems to be a remnant of openbinder, used in
+    /// BeOS.
+    write_ptr binder_set_idle_priority with b'b', 6; i32
+}
 ioctl! {
     /// Sets the magic handle "0" to the current binder connection.
+    ///
+    /// TODO: Figure out if arg is used, and if not how is it turned back into
+    /// a pointer (is it ?)
     ///
     /// Should only be called once during the whole lifetime of the kernel driver.
     ///
@@ -325,17 +576,38 @@ ioctl! {
     /// services. App services are managed by the ActivityManager service.
     write_ptr binder_set_context_mgr with b'b', 7; i32
 }
-ioctl!(write_ptr binder_thread_exit with b'b', 8; i32);
 ioctl! {
-    /// Used to make sure that the version of binder we use is the same version the
-    /// Kernel uses.
+    /// Should be called whenever a thread that called any binder ioctl exits,
+    /// otherwise the kernel driver leaks memory in some internal structure.
+    ///
+    /// The argument is unused, and should be set to null.
+    ///
+    /// For some hall of shame : The structure is created in
+    /// `binder_get_thread`, called in the
+    /// [poll](https://github.com/torvalds/linux/blob/00b40d613352c623aaae88a44e5ded7c912909d7/drivers/android/binder.c#L3115)
+    /// and
+    /// [ioctl](https://github.com/torvalds/linux/blob/00b40d613352c623aaae88a44e5ded7c912909d7/drivers/android/binder.c#L3261)
+    /// implementations. This data is stored by pid in an rb tree. But the
+    /// driver doesn't attempt to detect thread destruction in order to free the
+    /// allocated resources, and instead relies on the userspace to tell the
+    /// kernel when a thread gets destroyed. Admittedly, it looks like detecting
+    /// thread destruction is actually not-so-simple.
+    write_ptr binder_thread_exit with b'b', 8; i32
+}
+ioctl! {
+    /// Ensure that the version of binder we implement is the same version as
+    /// the kernel.
+    ///
+    /// The kernel will set the passed pointer to the currently implemented
+    /// version.
     ///
     /// Note that there are two versions of the Binder protocol in the kernel tree.
     /// The version used is selected at kernel compile-time depending on the
     /// architecture used. 64-bit targets use version 8, while 32-bit use version 7.
     ///
-    /// In rust-binder, the version is chosen with the BINDER_IPC_32BIT cfg
-    /// attribute.
+    /// In rust-binder, the implemented version is stored in
+    /// the `CurrentProtocolVersion`. Depending on the `BINDER_IPC_32BIT` cfg,
+    /// it will either be version 7 or 8.
     ///
     /// TODO: Eventually, this will be exposed as a crate feature, or maybe even
     /// dynamically figured out (which would be an improvement over libbinder). But

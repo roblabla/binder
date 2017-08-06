@@ -10,4 +10,4 @@ libc = "0.2"
 log = "0.3"
 error-chain = "0.10"
 byteorder = "1.1"
-bitflags = "0.9"
+bitflags = { git = "https://github.com/tamird/bitflags", branch = "associated-constants" }
