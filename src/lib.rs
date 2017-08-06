@@ -416,9 +416,9 @@ impl BinderConnection {
                     // TODO: AcquireResult => Needs BinderRc
                     Some(ReturnProtocolValue::Reply(txn)) => {
                         let mut buffer = unsafe {
-                            parcel::create_binder_parcel(self.clone(), txn.data.ptr.buffer as *mut u8,
+                            parcel::create_binder_parcel(self.clone(), txn.buffer as *mut u8,
                                           txn.data_size as usize,
-                                          txn.data.ptr.offsets as *mut usize,
+                                          txn.offsets as *mut usize,
                                           txn.offsets_size as usize)
                         };
                         if txn.flags & sys::TransactionFlags::STATUS_CODE.bits() == 0 {
